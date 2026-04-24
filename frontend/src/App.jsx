@@ -11,6 +11,7 @@ import AssetsLibraryPage from './pages/AssetsLibraryPage';
 import ProjectSettingsPage from './pages/ProjectSettingsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SiteEditorPage from './pages/SiteEditorPage';
+import StoreManagementPage from './pages/StoreManagementPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/publish" element={<PublishPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/store" element={<StoreManagementPage />} />
         </Route>
         
         {/* Full Screen Editor Route without Sidebar */}

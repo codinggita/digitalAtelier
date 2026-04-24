@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Layers, Palette, FolderOpen, Settings, HelpCircle, FileText, BarChart2 } from 'lucide-react';
+import { Home, Layers, Palette, FolderOpen, Settings, HelpCircle, FileText, BarChart2, Tag } from 'lucide-react';
 import { useState } from 'react';
 import NewProjectModal from './NewProjectModal';
 
@@ -9,6 +9,7 @@ export default function Sidebar() {
   
   const navItems = [
     { name: 'Home', icon: Home, path: '/dashboard' },
+    { name: 'Store', icon: Tag, path: '/store' },
     { name: 'Pages', icon: FileText, path: '/pages' },
     { name: 'Analytics', icon: BarChart2, path: '/analytics' },
     { name: 'Design', icon: Palette, path: '/design' },
