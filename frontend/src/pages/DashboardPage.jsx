@@ -1,7 +1,33 @@
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import { ArrowUpRight, Clock, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Clock, Sparkles, Loader2 } from 'lucide-react';
+import { projectService } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
+  const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      setIsLoading(true);
+      const response = await projectService.getProjects();
+      setProjects(response.data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load projects. Please check if the backend is running.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-gray-50">
       <Header 
@@ -29,7 +55,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
             <div className="flex justify-between items-start mb-6">
               <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
@@ -39,8 +65,6 @@ export default function DashboardPage() {
             </div>
             <p className="text-xs text-gray-500 font-medium mb-1 uppercase tracking-wide">Total Visitors</p>
             <h3 className="text-4xl font-bold text-gray-900 mb-6">42,891</h3>
-            
-            {/* Simple Bar Chart placeholder */}
             <div className="flex items-end gap-2 h-10 w-full">
               {[30, 40, 20, 50, 80, 100, 60].map((h, i) => (
                 <div key={i} className={`flex-1 rounded-sm ${i === 5 ? 'bg-primary' : 'bg-primary/20'}`} style={{ height: `${h}%` }}></div>
@@ -77,73 +101,80 @@ export default function DashboardPage() {
 
         {/* Websites Section */}
         <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Your websites</h2>
+          <h2 className="text-xl font-bold text-gray-900">Your projects</h2>
           <div className="flex gap-2 text-gray-400">
-            {/* View toggles */}
             <button className="p-1 hover:text-gray-900"><GridIcon /></button>
             <button className="p-1 hover:text-gray-900"><ListIcon /></button>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-12">
-           {/* Site Card */}
-           <div className="group cursor-pointer">
-              <div className="bg-gray-200 aspect-[4/3] rounded-xl mb-4 overflow-hidden border border-gray-200 relative">
-                 <div className="absolute inset-0 flex flex-col">
-                   <div className="h-6 bg-gray-800 flex items-center px-2 gap-1">
-                     <div className="w-2 h-2 rounded-full bg-red-400"></div>
-                     <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                     <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                   </div>
-                   <div className="flex-1 bg-white p-4">
-                     <div className="w-1/2 h-4 bg-gray-200 rounded mb-4"></div>
-                     <div className="w-full h-2 bg-gray-100 rounded mb-2"></div>
-                     <div className="w-3/4 h-2 bg-gray-100 rounded mb-4"></div>
-                     <div className="w-full h-16 bg-gray-100 rounded"></div>
-                   </div>
-                 </div>
-              </div>
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-bold text-gray-900">Lumina Studio</h4>
-                  <p className="text-xs text-gray-500">lumina-studio.atelier.io</p>
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            <p className="text-gray-500 font-medium">Loading your atelier...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-100 rounded-xl p-8 text-center mb-12">
+            <p className="text-red-600 font-medium mb-4">{error}</p>
+            <button 
+              onClick={fetchProjects}
+              className="px-6 py-2 bg-red-600 text-white rounded-lg font-bold text-sm hover:bg-red-700 transition-colors"
+            >
+              Retry Connection
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {projects.map((project) => (
+              <div 
+                key={project._id} 
+                onClick={() => navigate(`/site-editor/${project._id}`)}
+                className="group cursor-pointer"
+              >
+                <div className="bg-gray-200 aspect-[4/3] rounded-xl mb-4 overflow-hidden border border-gray-200 relative">
+                   <img 
+                    src={project.thumbnail || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop'} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                    alt={project.name} 
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button className="px-6 py-2 bg-white text-gray-900 rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                      Open Editor
+                    </button>
+                  </div>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-1 bg-gray-200 text-gray-600 rounded">LIVE</span>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-bold text-gray-900 group-hover:text-primary transition-colors">{project.name}</h4>
+                    <p className="text-xs text-gray-500">{project.description?.substring(0, 40)}...</p>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${
+                    project.status === 'Live' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {project.status || 'DRAFT'}
+                  </span>
+                </div>
               </div>
-           </div>
+            ))}
 
-           {/* Site Card 2 */}
-           <div className="group cursor-pointer">
-              <div className="bg-gray-200 aspect-[4/3] rounded-xl mb-4 overflow-hidden border border-gray-200 relative">
-                <div className="absolute inset-0 bg-white flex flex-col items-center justify-center p-4 text-center border-t-[16px] border-t-gray-800">
-                   <h3 className="text-xl font-serif mb-2">Basics & Co.</h3>
-                   <div className="w-16 h-1 bg-primary mb-4"></div>
-                   <div className="w-full h-12 bg-gray-50 rounded"></div>
-                </div>
-              </div>
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-bold text-gray-900">Basics & Co.</h4>
-                  <p className="text-xs text-gray-500">basics-co.atelier.io</p>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-1 bg-gray-200 text-gray-600 rounded">LIVE</span>
-              </div>
-           </div>
-
-           {/* Launch New */}
-           <div className="border-2 border-dashed border-gray-200 hover:border-primary/50 hover:bg-primary/5 rounded-xl flex flex-col items-center justify-center aspect-[4/3] cursor-pointer transition-colors mb-12">
+            {/* Launch New Card */}
+            <div 
+              onClick={() => document.getElementById('new-project-modal-btn')?.click()}
+              className="border-2 border-dashed border-gray-200 hover:border-primary/50 hover:bg-primary/5 rounded-xl flex flex-col items-center justify-center aspect-[4/3] cursor-pointer transition-colors"
+            >
               <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-3">
                 <span className="text-2xl leading-none">+</span>
               </div>
-              <h4 className="font-bold text-gray-900 mb-1">Launch Project</h4>
+              <h4 className="font-bold text-gray-900 mb-1">New Project</h4>
               <p className="text-xs text-gray-500">Start from a blank canvas</p>
-           </div>
-        </div>
+            </div>
+          </div>
+        )}
 
         {/* Masterclass Banner */}
-        <div className="bg-gray-900 rounded-2xl p-8 flex overflow-hidden relative">
+        <div className="bg-gray-900 rounded-2xl p-8 flex overflow-hidden relative mt-12">
            <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-black/50 to-transparent z-10"></div>
-           <div className="relative z-20 w-1/2">
+           <div className="relative z-20 w-full md:w-1/2">
              <p className="text-xs font-bold text-primary mb-2 tracking-widest uppercase">New Masterclass</p>
              <h2 className="text-3xl font-bold text-white mb-4 leading-tight">Master the Art of<br/>Conversions</h2>
              <p className="text-gray-400 text-sm mb-6 max-w-sm">

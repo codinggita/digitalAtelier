@@ -37,7 +37,7 @@ function App() {
         </Route>
         
         {/* Full Screen Editor Route without Sidebar */}
-        <Route path="/editor" element={<SiteEditorPage />} />
+        <Route path="/editor/:id" element={<SiteEditorPage />} />
       </Routes>
     </Router>
   );

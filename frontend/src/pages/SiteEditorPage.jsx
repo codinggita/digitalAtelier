@@ -1,18 +1,55 @@
-import React, { useState } from 'react';
-import { Type, Image as ImageIcon, Layout, Box, Check, MousePointer2, Move, Save, ChevronLeft, ShoppingBag, LayoutTemplate } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Type, Image as ImageIcon, Layout, Box, Check, MousePointer2, Move, Save, ChevronLeft, ShoppingBag, LayoutTemplate, Loader2 } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { projectService } from '../services/api';
 
 // A simple block-based editor simulation
 export default function SiteEditorPage() {
   const navigate = useNavigate();
-  const [elements, setElements] = useState([
-    { id: '1', type: 'header', content: 'My Awesome Brand', color: '#111827', align: 'center', fontSize: 'text-5xl' },
-    { id: '2', type: 'paragraph', content: 'We build digital experiences that matter.', color: '#6b7280', align: 'center', fontSize: 'text-lg' },
-    { id: '3', type: 'button', content: 'Shop Now', bg: '#4338ca', color: '#ffffff', align: 'center' }
-  ]);
-  
+  const { id } = useParams();
+  const [elements, setElements] = useState([]);
+  const [projectName, setProjectName] = useState('Untitled Project');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const selectedElement = elements.find(e => e.id === selectedId);
+
+  useEffect(() => {
+    if (id) {
+      fetchProject();
+    }
+  }, [id]);
+
+  const fetchProject = async () => {
+    try {
+      setIsLoading(true);
+      const response = await projectService.getProjectById(id);
+      if (response.success) {
+        setElements(response.data.elements || []);
+        setProjectName(response.data.name);
+      }
+    } catch (err) {
+      console.error('Failed to load project:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await projectService.updateProject(id, {
+        elements,
+        lastPublishedAt: new Date()
+      });
+      // Optionally show a success toast here
+    } catch (err) {
+      console.error('Failed to save project:', err);
+      alert('Failed to save project. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const addElement = (type) => {
     const newElement = {
@@ -42,8 +79,17 @@ export default function SiteEditorPage() {
     setSelectedId(null);
   };
 
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-gray-50 gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-gray-500 font-medium font-serif italic">Entering your digital atelier...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-screen bg-gray-100 text-gray-900 w-full fixed inset-0 z-50">
+    <div className="flex h-screen bg-gray-100 text-gray-900 w-full fixed inset-0 z-50 overflow-hidden">
       
       {/* Left Sidebar (Components) */}
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full z-10 shadow-sm">
@@ -89,20 +135,31 @@ export default function SiteEditorPage() {
       {/* Canvas Area (Center) */}
       <div className="flex-1 flex flex-col relative overflow-hidden bg-gray-100/50">
         <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
-          <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-md text-sm font-medium">
-             <span className="w-2 h-2 rounded-full bg-green-500"></span> Saved automatically
+          <div className="flex items-center gap-4">
+            <div className="bg-gray-100 px-3 py-1 rounded-md text-xs font-bold text-gray-600">
+               {projectName}
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
+               <span className="w-2 h-2 rounded-full bg-green-500"></span> 
+               {isSaving ? 'Saving changes...' : 'Ready'}
+            </div>
           </div>
           <div className="flex gap-3">
              <button className="px-4 py-1.5 text-sm font-bold text-gray-600 hover:text-gray-900">Preview</button>
-             <button onClick={() => navigate('/publish')} className="px-4 py-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-md shadow-sm flex items-center gap-2">
-                <Save className="w-4 h-4" /> Publish
+             <button 
+              onClick={handleSave} 
+              disabled={isSaving}
+              className="px-6 py-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-md shadow-sm flex items-center gap-2 disabled:opacity-50"
+            >
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 
+                Publish
              </button>
           </div>
         </div>
         
         <div className="flex-1 overflow-y-auto p-12 flex justify-center pb-32">
           {/* Website Frame */}
-          <div className="w-full max-w-4xl bg-white min-h-[800px] shadow-2xl rounded-sm border border-gray-200 flex flex-col py-16 px-8 relative">
+          <div className="w-full max-w-4xl bg-white min-h-[800px] shadow-2xl rounded-sm border border-gray-200 flex flex-col py-16 px-8 relative overflow-hidden">
             {elements.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center text-gray-400 flex-col gap-4">
                 <Box className="w-12 h-12 stroke-1" />
@@ -160,7 +217,7 @@ export default function SiteEditorPage() {
 
                 {/* Selection Overlay tools */}
                 {selectedId === el.id && (
-                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded-lg flex gap-3 shadow-xl">
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded-lg flex gap-3 shadow-xl z-20">
                     <button className="hover:text-primary transition-colors flex items-center gap-1"><Move className="w-3 h-3" /> Move</button>
                     <button onClick={(e) => { e.stopPropagation(); deleteSelected(); }} className="text-red-400 hover:text-red-300 transition-colors">Delete</button>
                   </div>
