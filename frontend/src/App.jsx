@@ -12,6 +12,8 @@ import ProjectSettingsPage from './pages/ProjectSettingsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SiteEditorPage from './pages/SiteEditorPage';
 import StoreManagementPage from './pages/StoreManagementPage';
+import UserProfilePage from './pages/UserProfilePage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -34,10 +36,14 @@ function App() {
           <Route path="/publish" element={<PublishPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/store" element={<StoreManagementPage />} />
+          <Route path="/profile" element={<UserProfilePage />} />
         </Route>
         
         {/* Full Screen Editor Route without Sidebar */}
         <Route path="/editor/:id" element={<SiteEditorPage />} />
+
+        {/* 404 Catch-All Route */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
