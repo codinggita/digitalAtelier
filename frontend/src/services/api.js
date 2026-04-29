@@ -79,4 +79,27 @@ export const projectService = {
   }
 };
 
+export const pageService = {
+  getPages: async () => {
+    const response = await API.get('/pages');
+    return response.data;
+  },
+  getProjectPages: async (projectId) => {
+    const response = await API.get(`/pages/project/${projectId}`);
+    return response.data;
+  },
+  createPage: async (pageData) => {
+    const response = await API.post('/pages', pageData);
+    return response.data;
+  },
+  updatePage: async (id, pageData) => {
+    const response = await API.put(`/pages/${id}`, pageData);
+    return response.data;
+  },
+  deletePage: async (id) => {
+    const response = await API.delete(`/pages/${id}`);
+    return response.data;
+  }
+};
+
 export default API;

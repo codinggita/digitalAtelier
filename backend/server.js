@@ -25,10 +25,12 @@ app.get('/', (req, res) => {
 const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
+const pageRoutes = require('./routes/pageRoutes');
 
 app.use('/api/projects', projectRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/pages', pageRoutes);
 
 // Global Error Handler Middleware (must be at the end)
 app.use(errorHandler);
