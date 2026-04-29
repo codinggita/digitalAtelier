@@ -138,4 +138,11 @@ export const assetService = {
   }
 };
 
+export const analyticsService = {
+  getAnalytics: async () => {
+    const response = await API.get('/analytics');
+    return response.data;
+  }
+};
+
 export default API;
