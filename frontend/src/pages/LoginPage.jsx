@@ -1,7 +1,49 @@
-import { Link } from 'react-router-dom';
-import { Eye, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+  const { error: showError } = useNotification();
+  
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get the redirect path from location state, default to dashboard
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  const handleChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const result = await login(formData.email, formData.password);
+      
+      if (result.success) {
+        // Navigate to the page they tried to visit, or dashboard
+        navigate(from, { replace: true });
+      } else {
+        showError(result.error || 'Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      showError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl flex items-center justify-center relative">
       {/* Testimonial floating card (desktop only) */}
@@ -18,7 +60,6 @@ export default function LoginPage() {
         </p>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-             {/* Avatar placeholder */}
              <div className="w-full h-full bg-slate-300"></div>
           </div>
           <div>
@@ -30,7 +71,6 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md bg-white rounded-[32px] shadow-2xl overflow-hidden relative z-20 px-8 py-10 md:px-10 md:py-12">
         <div className="flex justify-center items-center mb-8 gap-2">
-          {/* Logo icon placeholder */}
           <div className="w-6 h-6 border-2 border-primary rounded-sm transform rotate-45 flex items-center justify-center">
             <div className="w-2 h-2 bg-primary transform -rotate-45"></div>
           </div>
@@ -42,15 +82,19 @@ export default function LoginPage() {
           <p className="text-sm text-gray-500">Enter your credentials to access your studio.</p>
         </div>
 
-        <form className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1.5">Email Address</label>
             <div className="relative">
               <input 
                 type="email" 
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="name@studio.com" 
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                defaultValue="name@studio.com"
+                style={{ paddingLeft: '2.5rem' }}
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +102,6 @@ export default function LoginPage() {
                 </svg>
               </div>
             </div>
-            <style dangerouslySetInnerHTML={{__html: `input[type="email"] { padding-left: 2.5rem; }`}} />
           </div>
 
           <div>
@@ -68,21 +111,28 @@ export default function LoginPage() {
             </div>
             <div className="relative">
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
+                name="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="••••••••" 
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                defaultValue="password123"
+                style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                 </svg>
               </div>
-              <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <Eye className="w-4 h-4" />
+              <button 
+                type="button" 
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <style dangerouslySetInnerHTML={{__html: `input[type="password"] { padding-left: 2.5rem; padding-right: 2.5rem; }`}} />
           </div>
 
           <div className="flex items-center">
@@ -90,14 +140,22 @@ export default function LoginPage() {
             <label htmlFor="remember" className="ml-2 text-xs text-gray-600">Remember this device</label>
           </div>
 
-          <Link to="/dashboard" className="block w-full bg-primary hover:bg-primary/90 text-white text-center font-medium py-3 rounded-xl transition-colors">
-            Log In →
-          </Link>
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full bg-primary hover:bg-primary/90 text-white flex justify-center items-center font-medium py-3 rounded-xl transition-colors disabled:opacity-70"
+          >
+            {isSubmitting ? (
+              <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Logging in...</>
+            ) : (
+              'Log In →'
+            )}
+          </button>
         </form>
 
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            Don't have an account? <a href="#" className="text-primary font-medium">Start building for free</a>
+            Don't have an account? <Link to="/register" className="text-primary font-medium hover:underline">Start building for free</Link>
           </p>
         </div>
 
