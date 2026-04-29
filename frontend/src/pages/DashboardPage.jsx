@@ -1,199 +1,145 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import { ArrowUpRight, Clock, Sparkles, Loader2 } from 'lucide-react';
-import { projectService } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import NewProjectModal from '../components/NewProjectModal';
+import { useAuth } from '../context/AuthContext';
+import dashboardService from '../services/dashboardService';
+import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const [projects, setProjects] = useState([]);
+  const { user } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [stats, setStats] = useState({
+    totalProjects: 0,
+    liveProjects: 0,
+    totalViews: 0,
+    totalSales: '$0.00'
+  });
+  const [recentProjects, setRecentProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
-    try {
+    const fetchDashboardData = async () => {
       setIsLoading(true);
-      const response = await projectService.getProjects();
-      setProjects(response.data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to load projects. Please check if the backend is running.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      try {
+        const [statsRes, activityRes] = await Promise.all([
+          dashboardService.getOverviewStats(),
+          dashboardService.getRecentActivity()
+        ]);
+        
+        if (statsRes.success) setStats(statsRes.data);
+        if (activityRes.success) setRecentProjects(activityRes.data);
+      } catch (err) {
+        console.error('Error fetching dashboard:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
       <Header 
-        title="Digital Atelier" 
-        tabs={['Dashboard', 'Templates', 'Analytics']} 
-        activeTab="Dashboard" 
+        title="Dashboard" 
+        tabs={['Overview', 'Performance', 'Activity']} 
+        activeTab="Overview" 
       />
       
-      <div className="p-8 max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Portfolio Overview</h1>
-            <p className="text-sm text-gray-500 max-w-xl">
-              Manage your digital spaces and monitor performance metrics in real-time. Your atelier is ready for refinement.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">
-              Filter
-            </button>
-            <button className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors">
-              Export Report
-            </button>
-          </div>
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <div className="flex justify-between items-start mb-6">
-              <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
-                <TrendingUpIcon />
-              </div>
-              <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">+12.5%</span>
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar activePath="/dashboard" />
+        
+        <main className="flex-1 p-8 overflow-y-auto">
+          {isLoading ? (
+            <div className="h-full w-full flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
-            <p className="text-xs text-gray-500 font-medium mb-1 uppercase tracking-wide">Total Visitors</p>
-            <h3 className="text-4xl font-bold text-gray-900 mb-6">42,891</h3>
-            <div className="flex items-end gap-2 h-10 w-full">
-              {[30, 40, 20, 50, 80, 100, 60].map((h, i) => (
-                <div key={i} className={`flex-1 rounded-sm ${i === 5 ? 'bg-primary' : 'bg-primary/20'}`} style={{ height: `${h}%` }}></div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-             <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-600 mb-6">
-                <Clock className="w-4 h-4" />
-             </div>
-             <p className="text-xs text-gray-500 font-medium mb-1 uppercase tracking-wide">Avg. Sessions</p>
-             <h3 className="text-4xl font-bold text-gray-900 mb-6">4m 32s</h3>
-             <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                <CheckCircleIcon />
-                Optimum Performance
-             </div>
-          </div>
-
-          <div className="bg-primary text-white p-6 rounded-2xl shadow-md relative overflow-hidden flex flex-col justify-between">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-             <div>
-               <Sparkles className="w-6 h-6 mb-4 text-purple-200" />
-               <h3 className="text-lg font-bold mb-2">AI Content Assistant</h3>
-               <p className="text-sm text-primary-100/80 mb-6">
-                 Generate SEO-optimized copy for your landing pages in seconds.
-               </p>
-             </div>
-             <button className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-sm font-medium py-2.5 rounded-lg transition-colors border border-white/10">
-               Launch AI
-             </button>
-          </div>
-        </div>
-
-        {/* Websites Section */}
-        <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Your projects</h2>
-          <div className="flex gap-2 text-gray-400">
-            <button className="p-1 hover:text-gray-900"><GridIcon /></button>
-            <button className="p-1 hover:text-gray-900"><ListIcon /></button>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
-            <p className="text-gray-500 font-medium">Loading your atelier...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 border border-red-100 rounded-xl p-8 text-center mb-12">
-            <p className="text-red-600 font-medium mb-4">{error}</p>
-            <button 
-              onClick={fetchProjects}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg font-bold text-sm hover:bg-red-700 transition-colors"
-            >
-              Retry Connection
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {projects.map((project) => (
-              <div 
-                key={project._id} 
-                onClick={() => navigate(`/site-editor/${project._id}`)}
-                className="group cursor-pointer"
-              >
-                <div className="bg-gray-200 aspect-[4/3] rounded-xl mb-4 overflow-hidden border border-gray-200 relative">
-                   <img 
-                    src={project.thumbnail || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop'} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                    alt={project.name} 
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button className="px-6 py-2 bg-white text-gray-900 rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                      Open Editor
-                    </button>
-                  </div>
+          ) : (
+            <div className="max-w-6xl mx-auto space-y-8">
+              
+              {/* Welcome Section */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.firstName || 'Creator'} 👋</h1>
+                  <p className="text-gray-500 mt-1">Here is what is happening with your storefront today.</p>
                 </div>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-bold text-gray-900 group-hover:text-primary transition-colors">{project.name}</h4>
-                    <p className="text-xs text-gray-500">{project.description?.substring(0, 40)}...</p>
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-primary/30 transition-all flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                  New Project
+                </button>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-4 gap-6">
+                {[
+                  { label: 'Total Projects', value: stats.totalProjects, change: '+2', trend: 'up' },
+                  { label: 'Live Sites', value: stats.liveProjects, change: 'Stable', trend: 'neutral' },
+                  { label: 'Page Views (30d)', value: stats.totalViews, change: '+14.5%', trend: 'up' },
+                  { label: 'Total Revenue', value: stats.totalSales, change: '+5.2%', trend: 'up' },
+                ].map((stat, i) => (
+                  <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                    <h3 className="text-sm font-semibold text-gray-500 mb-2">{stat.label}</h3>
+                    <div className="flex items-end justify-between">
+                      <span className="text-3xl font-bold text-gray-900">{stat.value}</span>
+                      <span className={`text-xs font-bold px-2 py-1 rounded-md ${
+                        stat.trend === 'up' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-600'
+                      }`}>
+                        {stat.change}
+                      </span>
+                    </div>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${
-                    project.status === 'Live' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {project.status || 'DRAFT'}
-                  </span>
+                ))}
+              </div>
+
+              {/* Recent Projects List */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                  <h2 className="font-bold text-gray-900">Recent Projects</h2>
+                  <button className="text-sm text-primary font-medium hover:underline">View all</button>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {recentProjects.length > 0 ? (
+                    recentProjects.map((project) => (
+                      <div key={project._id} className="flex items-center justify-between p-6 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-12 bg-gray-200 rounded-lg overflow-hidden border border-gray-200">
+                            <img src={project.thumbnail} className="w-full h-full object-cover" alt="thumbnail" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-gray-900">{project.name}</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Last updated {new Date(project.updatedAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-full ${
+                            project.status === 'Live' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {project.status}
+                          </span>
+                          <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      No projects found. Create your first project to get started!
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
-
-            {/* Launch New Card */}
-            <div 
-              onClick={() => document.getElementById('new-project-modal-btn')?.click()}
-              className="border-2 border-dashed border-gray-200 hover:border-primary/50 hover:bg-primary/5 rounded-xl flex flex-col items-center justify-center aspect-[4/3] cursor-pointer transition-colors"
-            >
-              <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-3">
-                <span className="text-2xl leading-none">+</span>
-              </div>
-              <h4 className="font-bold text-gray-900 mb-1">New Project</h4>
-              <p className="text-xs text-gray-500">Start from a blank canvas</p>
+              
             </div>
-          </div>
-        )}
-
-        {/* Masterclass Banner */}
-        <div className="bg-gray-900 rounded-2xl p-8 flex overflow-hidden relative mt-12">
-           <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-black/50 to-transparent z-10"></div>
-           <div className="relative z-20 w-full md:w-1/2">
-             <p className="text-xs font-bold text-primary mb-2 tracking-widest uppercase">New Masterclass</p>
-             <h2 className="text-3xl font-bold text-white mb-4 leading-tight">Master the Art of<br/>Conversions</h2>
-             <p className="text-gray-400 text-sm mb-6 max-w-sm">
-               Learn how to structure your sections to guide users toward your CTA effortlessly. Curated by our top design leads.
-             </p>
-             <button className="bg-white hover:bg-gray-100 text-gray-900 font-semibold py-2.5 px-5 rounded-lg text-sm transition-colors flex items-center gap-2">
-               Watch Workshop
-               <ArrowUpRight className="w-4 h-4" />
-             </button>
-           </div>
-        </div>
-
+          )}
+        </main>
       </div>
+
+      <NewProjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }
-
-// Simple icons for the dashboard
-function TrendingUpIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>; }
-function CheckCircleIcon() { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>; }
-function GridIcon() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>; }
-function ListIcon() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>; }
