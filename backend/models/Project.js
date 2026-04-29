@@ -5,6 +5,11 @@ const mongoose = require('mongoose');
  * This model stores all the metadata and content for a user's project.
  */
 const projectSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
+  },
   name: {
     type: String,
     required: [true, 'Project name is required'],
