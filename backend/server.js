@@ -26,11 +26,13 @@ const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const pageRoutes = require('./routes/pageRoutes');
+const assetRoutes = require('./routes/assetRoutes');
 
 app.use('/api/projects', projectRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/pages', pageRoutes);
+app.use('/api/assets', assetRoutes);
 
 // Global Error Handler Middleware (must be at the end)
 app.use(errorHandler);

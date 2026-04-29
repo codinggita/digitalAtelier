@@ -96,8 +96,44 @@ export const pageService = {
     const response = await API.put(`/pages/${id}`, pageData);
     return response.data;
   },
+export const pageService = {
+  getPages: async () => {
+    const response = await API.get('/pages');
+    return response.data;
+  },
+  getProjectPages: async (projectId) => {
+    const response = await API.get(`/pages/project/${projectId}`);
+    return response.data;
+  },
+  createPage: async (pageData) => {
+    const response = await API.post('/pages', pageData);
+    return response.data;
+  },
+  updatePage: async (id, pageData) => {
+    const response = await API.put(`/pages/${id}`, pageData);
+    return response.data;
+  },
   deletePage: async (id) => {
     const response = await API.delete(`/pages/${id}`);
+    return response.data;
+  }
+};
+
+export const assetService = {
+  getAssets: async () => {
+    const response = await API.get('/assets');
+    return response.data;
+  },
+  createAsset: async (assetData) => {
+    const response = await API.post('/assets', assetData);
+    return response.data;
+  },
+  updateAsset: async (id, assetData) => {
+    const response = await API.put(`/assets/${id}`, assetData);
+    return response.data;
+  },
+  deleteAsset: async (id) => {
+    const response = await API.delete(`/assets/${id}`);
     return response.data;
   }
 };
