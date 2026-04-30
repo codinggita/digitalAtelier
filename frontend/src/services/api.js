@@ -145,4 +145,11 @@ export const analyticsService = {
   }
 };
 
+export const templateService = {
+  getTemplates: async () => {
+    const response = await API.get('/templates');
+    return response.data;
+  }
+};
+
 export default API;
