@@ -1,13 +1,120 @@
 import Header from '../components/Header';
-import { Info, Search, Code, Eye, AlertTriangle } from 'lucide-react';
+import { Info, Search, Code, Eye, AlertTriangle, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { projectService } from '../services/api';
+import { useNotification } from '../context/NotificationContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProjectSettingsPage() {
+  const [project, setProject] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    domain: '',
+    seoTitle: '',
+    seoDescription: '',
+    headerScripts: '',
+    analyticsId: '',
+    stripeKey: ''
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const { success, error } = useNotification();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchProject();
+  }, []);
+
+  const fetchProject = async () => {
+    try {
+      setIsLoading(true);
+      const res = await projectService.getProjects();
+      if (res.success && res.data.length > 0) {
+        const primaryProject = res.data[0];
+        setProject(primaryProject);
+        setFormData({
+          name: primaryProject.name || '',
+          domain: primaryProject.domain || '',
+          seoTitle: primaryProject.seoTitle || '',
+          seoDescription: primaryProject.seoDescription || '',
+          headerScripts: primaryProject.headerScripts || '',
+          analyticsId: primaryProject.analyticsId || '',
+          stripeKey: primaryProject.stripeKey || ''
+        });
+      }
+    } catch (err) {
+      error('Failed to load project settings.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    if (!project) return;
+    try {
+      setIsSaving(true);
+      const res = await projectService.updateProject(project._id, formData);
+      if (res.success) {
+        success('Project settings saved successfully!');
+        setProject(res.data);
+      }
+    } catch (err) {
+      error('Failed to save settings.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!project) return;
+    if (!window.confirm('Are you absolutely sure you want to delete this project? This is irreversible.')) return;
+    
+    try {
+      setIsSaving(true);
+      const res = await projectService.deleteProject(project._id);
+      if (res.success) {
+        success('Project deleted permanently.');
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      error('Failed to delete project.');
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full bg-gray-50">
+        <Header title="Settings" tabs={['Dashboard']} activeTab="Dashboard" />
+        <div className="flex-1 flex justify-center items-center">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="flex flex-col h-full bg-gray-50">
+        <Header title="Settings" tabs={['Dashboard']} activeTab="Dashboard" />
+        <div className="flex-1 flex justify-center items-center text-gray-500">
+          No project found. Please create one from the dashboard.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-gray-50">
       <Header 
-        title="My Online Boutique" 
-        tabs={['Dashboard', 'Site Editor']} 
-        activeTab="Site Editor" 
+        title={project.name || "Project Settings"} 
+        tabs={['Dashboard', 'Site Editor', 'Settings']} 
+        activeTab="Settings" 
       />
       
       <div className="flex flex-1 overflow-hidden">
@@ -16,7 +123,7 @@ export default function ProjectSettingsPage() {
            <h2 className="text-xl font-bold text-gray-900 mb-8">Project Settings</h2>
            <nav className="space-y-2">
              <button className="w-full flex items-center gap-3 px-3 py-2.5 bg-primary/5 text-primary rounded-lg text-sm font-bold border border-primary/10">
-               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+               <Info className="w-4 h-4" />
                General Settings
              </button>
              <button className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg text-sm font-medium">
@@ -50,19 +157,19 @@ export default function ProjectSettingsPage() {
               <div className="grid grid-cols-2 gap-6 mb-6">
                  <div>
                    <label className="block text-xs font-bold text-gray-700 mb-2">Project Name</label>
-                   <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" defaultValue="My Online Boutique" />
+                   <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" />
                  </div>
                  <div>
                    <label className="block text-xs font-bold text-gray-700 mb-2">Internal Reference ID</label>
-                   <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" defaultValue="DA-7729-BQ" disabled />
+                   <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-500 cursor-not-allowed" value={project._id} disabled />
                  </div>
               </div>
 
               <div>
                  <label className="block text-xs font-bold text-gray-700 mb-2">Primary Domain</label>
                  <div className="flex gap-4">
-                   <input type="text" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" defaultValue="https://boutique.atelier.com" />
-                   <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-lg text-sm transition-colors whitespace-nowrap">Connect Custom Domain</button>
+                   <input type="text" name="domain" value={formData.domain} onChange={handleInputChange} placeholder="e.g., https://myboutique.com" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" />
+                   <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-lg text-sm transition-colors whitespace-nowrap">Connect Domain</button>
                  </div>
               </div>
            </div>
@@ -83,25 +190,25 @@ export default function ProjectSettingsPage() {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-2">Global Title Tag</label>
-                    <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" defaultValue="The Digital Atelier | Bespoke Fashion Curated for You" />
-                    <p className="text-[10px] text-gray-400 mt-1 flex justify-between"><span>Ideal length: 50-60 characters</span><span>54/60</span></p>
+                    <input type="text" name="seoTitle" value={formData.seoTitle} onChange={handleInputChange} placeholder="e.g., The Digital Atelier | Bespoke Fashion" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" />
+                    <p className="text-[10px] text-gray-400 mt-1 flex justify-between"><span>Ideal length: 50-60 characters</span><span>{formData.seoTitle.length}/60</span></p>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-2">Meta Description</label>
-                    <textarea className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 h-24 resize-none" defaultValue="Discover a curated collection of artisanal pieces from around the world. Shop high-end fashion with a sustainable conscience."></textarea>
-                    <p className="text-[10px] text-gray-400 mt-1 flex justify-between"><span>Ideal length: 150-160 characters</span><span>142/160</span></p>
+                    <textarea name="seoDescription" value={formData.seoDescription} onChange={handleInputChange} placeholder="Brief description of your site..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 h-24 resize-none"></textarea>
+                    <p className="text-[10px] text-gray-400 mt-1 flex justify-between"><span>Ideal length: 150-160 characters</span><span>{formData.seoDescription.length}/160</span></p>
                   </div>
                 </div>
                 <div>
                    <label className="block text-xs font-bold text-gray-700 mb-2">Social Share Preview</label>
                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                      <div className="h-32 bg-gray-100 relative">
-                        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=400&auto=format&fit=crop" className="w-full h-full object-cover" />
+                        <img src={project.thumbnail} className="w-full h-full object-cover" alt="Share Preview" />
                      </div>
                      <div className="p-4 bg-gray-50">
-                       <div className="h-3 bg-gray-300 rounded w-1/3 mb-2"></div>
-                       <div className="h-4 bg-gray-400 rounded w-full mb-1"></div>
-                       <div className="h-4 bg-gray-400 rounded w-2/3"></div>
+                       <h4 className="text-xs font-bold text-blue-600 truncate">{formData.domain || 'yoursite.com'}</h4>
+                       <h3 className="text-sm font-bold text-gray-900 truncate my-1">{formData.seoTitle || project.name}</h3>
+                       <p className="text-xs text-gray-500 line-clamp-2">{formData.seoDescription || project.description}</p>
                      </div>
                    </div>
                    <p className="text-[10px] text-gray-500 mt-2">Recommended 1200x630px for optimal social platform rendering.</p>
@@ -124,11 +231,10 @@ export default function ProjectSettingsPage() {
               <div className="mb-6">
                 <div className="flex gap-6 border-b border-gray-200 mb-4">
                   <button className="pb-2 text-sm font-bold border-b-2 border-primary text-primary">Header Scripts</button>
-                  <button className="pb-2 text-sm font-medium border-b-2 border-transparent text-gray-500">Footer Scripts</button>
                 </div>
-                <div className="bg-gray-900 rounded-xl p-4 font-mono text-sm text-green-400 h-32 relative">
-                  {'<!-- Insert your tracking codes or custom CSS here -->'}
-                  <span className="absolute top-4 right-4 text-[10px] bg-white/10 text-white/50 px-2 py-1 rounded">HTML / JS / CSS</span>
+                <div className="relative">
+                  <textarea name="headerScripts" value={formData.headerScripts} onChange={handleInputChange} placeholder="<!-- Insert your tracking codes or custom CSS here -->" className="bg-gray-900 rounded-xl p-4 font-mono text-sm text-green-400 h-32 w-full resize-none focus:ring-2 focus:ring-primary/20"></textarea>
+                  <span className="absolute top-4 right-4 text-[10px] bg-white/10 text-white/50 px-2 py-1 rounded pointer-events-none">HTML / JS / CSS</span>
                 </div>
               </div>
 
@@ -136,14 +242,14 @@ export default function ProjectSettingsPage() {
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-2">Google Analytics ID</label>
                   <div className="relative">
-                    <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 pr-10" defaultValue="G-ANALYTICS-X9920" />
+                    <input type="text" name="analyticsId" value={formData.analyticsId} onChange={handleInputChange} placeholder="G-XXXXXXXXXX" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 pr-10" />
                     <Eye className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-2">Stripe Public Key</label>
                   <div className="relative">
-                    <input type="text" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 pr-10" defaultValue="pk_live_..." />
+                    <input type="text" name="stripeKey" value={formData.stripeKey} onChange={handleInputChange} placeholder="pk_live_..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 pr-10" />
                     <Eye className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
                 </div>
@@ -156,7 +262,7 @@ export default function ProjectSettingsPage() {
                   </h4>
                   <p className="text-xs text-red-600">Permanently delete this project and all associated assets. This action is irreversible.</p>
                 </div>
-                <button className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition-colors shadow-sm">
+                <button onClick={handleDelete} disabled={isSaving} className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition-colors shadow-sm disabled:opacity-50">
                   Delete Project
                 </button>
               </div>
@@ -169,8 +275,9 @@ export default function ProjectSettingsPage() {
       <div className="fixed bottom-0 left-64 right-0 bg-white border-t border-gray-200 p-4 flex justify-between items-center px-8 z-20 md:left-0">
         <div className="hidden md:block"></div> {/* Spacer for md */}
         <div className="flex gap-4 items-center ml-auto">
-          <button className="text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 px-6 py-2.5 rounded-lg transition-colors">Discard Changes</button>
-          <button className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-colors shadow-sm">
+          <button onClick={() => fetchProject()} disabled={isSaving} className="text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50">Discard Changes</button>
+          <button onClick={handleSave} disabled={isSaving} className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50">
+            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
             Save Configuration
           </button>
         </div>

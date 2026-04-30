@@ -37,6 +37,11 @@ const projectSchema = new mongoose.Schema({
     fontFamily: { type: String, default: 'Inter' },
     borderRadius: { type: String, default: '8px' }
   },
+  seoTitle: { type: String, default: '' },
+  seoDescription: { type: String, default: '' },
+  headerScripts: { type: String, default: '' },
+  analyticsId: { type: String, default: '' },
+  stripeKey: { type: String, default: '' },
   status: {
     type: String,
     enum: ['Draft', 'Live', 'Archived'],
