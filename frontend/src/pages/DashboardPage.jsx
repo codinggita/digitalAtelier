@@ -48,8 +48,6 @@ export default function DashboardPage() {
       />
       
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar activePath="/dashboard" />
-        
         <main className="flex-1 p-8 overflow-y-auto">
           {isLoading ? (
             <div className="h-full w-full flex items-center justify-center">

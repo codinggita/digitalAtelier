@@ -77,7 +77,7 @@ export default function LoginPage() {
           <h1 className="text-xl font-bold tracking-tight text-gray-900">Digital Atelier</h1>
         </div>
 
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h2>
           <p className="text-sm text-gray-500">Enter your credentials to access your studio.</p>
         </div>

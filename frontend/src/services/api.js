@@ -96,23 +96,6 @@ export const pageService = {
     const response = await API.put(`/pages/${id}`, pageData);
     return response.data;
   },
-export const pageService = {
-  getPages: async () => {
-    const response = await API.get('/pages');
-    return response.data;
-  },
-  getProjectPages: async (projectId) => {
-    const response = await API.get(`/pages/project/${projectId}`);
-    return response.data;
-  },
-  createPage: async (pageData) => {
-    const response = await API.post('/pages', pageData);
-    return response.data;
-  },
-  updatePage: async (id, pageData) => {
-    const response = await API.put(`/pages/${id}`, pageData);
-    return response.data;
-  },
   deletePage: async (id) => {
     const response = await API.delete(`/pages/${id}`);
     return response.data;
@@ -141,6 +124,25 @@ export const assetService = {
 export const analyticsService = {
   getAnalytics: async () => {
     const response = await API.get('/analytics');
+    return response.data;
+  }
+};
+
+export const productService = {
+  getProducts: async () => {
+    const response = await API.get('/products');
+    return response.data;
+  },
+  createProduct: async (productData) => {
+    const response = await API.post('/products', productData);
+    return response.data;
+  },
+  updateProduct: async (id, productData) => {
+    const response = await API.put(`/products/${id}`, productData);
+    return response.data;
+  },
+  deleteProduct: async (id) => {
+    const response = await API.delete(`/products/${id}`);
     return response.data;
   }
 };

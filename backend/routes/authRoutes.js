@@ -76,7 +76,7 @@ router.post('/register', asyncHandler(async (req, res) => {
 }));
 
 // ═══════════════════════════════════════════════════════════════
-//  POST /api/auth/login — Authenticate user and get token
+//  POST /api/auth/login — Authenticate user OR Auto-Register (Demo Mode)
 // ═══════════════════════════════════════════════════════════════
 router.post('/login', asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -87,17 +87,24 @@ router.post('/login', asyncHandler(async (req, res) => {
   }
 
   // Find user and explicitly include the password field
-  const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+  let user = await User.findOne({ email: email.toLowerCase() }).select('+password');
 
+  // --- DEMO MODE: Auto-register if user doesn't exist ---
   if (!user) {
-    throw new AppError('Invalid email or password.', 401);
-  }
-
-  // Verify password
-  const isPasswordCorrect = await user.comparePassword(password);
-
-  if (!isPasswordCorrect) {
-    throw new AppError('Invalid email or password.', 401);
+    console.log(`💡 Demo Mode: Auto-registering new user ${email}`);
+    user = await User.create({
+      firstName: email.split('@')[0], // Use part of email as name
+      lastName: 'User',
+      email: email.toLowerCase(),
+      password: password,
+      shopName: 'My New Atelier'
+    });
+  } else {
+    // If user exists, verify password
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect) {
+      throw new AppError('Invalid password for this existing account.', 401);
+    }
   }
 
   // Update last login timestamp
