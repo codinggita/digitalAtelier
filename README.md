@@ -1,8 +1,21 @@
-# 🎨 Digital Atelier
+# Digital Atelier 🎨
 
-> **"Every shop owner deserves a beautiful website — no coding required."**
+Digital Atelier is a premium, full-stack studio management and site builder platform designed for creative entrepreneurs.
 
-Digital Atelier is a no-code website builder designed specifically for shop owners. It empowers boutiques, local stores, and fashion brands to create stunning, fully responsive storefronts without writing a single line of code — built with React + Tailwind on the frontend and Node.js + MongoDB on the backend.
+## 🚀 Tech Stack
+- **Frontend**: React.js, Vite, Tailwind CSS, Lucide Icons
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB (Mongoose)
+- **Authentication**: JWT (JSON Web Tokens)
+
+## ✨ Key Features
+- **Project Dashboard**: Real-time analytics and project tracking.
+- **Site Builder**: Interactive drag-and-drop editor for creating web pages.
+- **Asset Library**: Centralized management for images and media.
+- **Product Store**: Integrated e-commerce management.
+- **Presentation Mode**: Auto-registration for seamless demo sessions.
+
+## 🛠️ Getting Started
 
 ---
 
