@@ -151,35 +151,41 @@ export default function TemplatesPage() {
         )}
 
         {/* Bottom Banner Row */}
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-1 bg-gray-800 text-white rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xl font-bold mb-2">Build with AI Intelligence.</h3>
-            <p className="text-xs text-gray-400 mb-6">Our creative engine analyzes your industry to suggest the best typography and color palettes automatically.</p>
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-2">
+        <div className="grid grid-cols-12 gap-6 pb-20">
+          <div className="col-span-5 bg-gray-900 text-white rounded-[32px] p-8 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+            <h3 className="text-2xl font-black mb-3 leading-tight">Build with AI Intelligence.</h3>
+            <p className="text-sm text-gray-400 mb-8 max-w-xs leading-relaxed">Our creative engine analyzes your industry to suggest the best typography and color palettes automatically.</p>
+            <div className="flex items-center gap-4">
+              <div className="flex -space-x-3">
                 {[1,2,3].map(i => (
-                  <img key={i} src={`https://i.pravatar.cc/150?img=${i+10}`} className="w-8 h-8 rounded-full border-2 border-gray-800" alt="avatar" />
+                  <img key={i} src={`https://i.pravatar.cc/150?img=${i+20}`} className="w-10 h-10 rounded-full border-2 border-gray-900 shadow-sm" alt="avatar" />
                 ))}
-                <div className="w-8 h-8 rounded-full bg-purple-600 border-2 border-gray-800 flex items-center justify-center text-[10px] font-bold">
+                <div className="w-10 h-10 rounded-full bg-indigo-600 border-2 border-gray-900 flex items-center justify-center text-[10px] font-black shadow-sm">
                   +2k
                 </div>
               </div>
-              <span className="text-[10px] text-gray-400">Joined the studio this month</span>
+              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Joined the studio this month</span>
+            </div>
+            <div className="absolute bottom-6 right-8 opacity-20 group-hover:opacity-100 transition-opacity">
+               <Sparkles className="w-10 h-10 text-indigo-400" />
             </div>
           </div>
-          <div className="col-span-1 bg-primary text-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
-            <h2 className="text-5xl font-bold mb-1">99%</h2>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2">Speed Score</p>
-            <p className="text-[10px] text-primary-100">Optimized for search engines and mobile performance.</p>
+
+          <div className="col-span-3 bg-indigo-600 text-white rounded-[32px] p-8 flex flex-col items-center justify-center text-center shadow-lg shadow-indigo-200">
+            <h2 className="text-6xl font-black mb-1">99%</h2>
+            <p className="text-xs font-black tracking-[0.2em] uppercase mb-3 text-indigo-200">Speed Score</p>
+            <p className="text-[10px] text-indigo-100/70 font-medium">Optimized for search engines and mobile performance.</p>
           </div>
-          <div className="col-span-1 bg-gray-200 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-center shadow-sm">
-            <div className="w-8 h-8 rounded bg-white flex items-center justify-center mb-4 shadow-sm text-gray-800 z-10">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+
+          <div className="col-span-4 bg-gray-100 rounded-[32px] p-8 relative overflow-hidden flex flex-col justify-center group">
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center mb-6 shadow-sm text-gray-900 group-hover:rotate-12 transition-transform">
+               <Layout className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-gray-900 mb-2 z-10">Pixel Perfect</h3>
-            <p className="text-xs text-gray-600 z-10">Your site looks stunning on any screen size, guaranteed.</p>
-            <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white">
-               <Sparkles className="w-6 h-6 -ml-2 -mt-2" />
+            <h3 className="text-xl font-black text-gray-900 mb-2">Pixel Perfect</h3>
+            <p className="text-sm text-gray-500 leading-relaxed max-w-[200px]">Your site looks stunning on any screen size, guaranteed.</p>
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center text-white rotate-12">
+               <Sparkles className="w-10 h-10 -ml-4 -mt-4" />
             </div>
           </div>
         </div>

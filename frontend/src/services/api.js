@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 // Create an axios instance with a base URL
-// The backend runs on port 5000 by default
+// Use VITE_API_URL from .env for production, default to localhost for development
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },

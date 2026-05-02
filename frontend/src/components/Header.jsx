@@ -25,7 +25,7 @@ export default function Header({ title, tabs, activeTab }) {
       <div className="flex items-center gap-8">
         <h1 className="font-bold text-gray-900">{title}</h1>
         <nav className="flex gap-6">
-          {tabs.map((tab) => (
+          {['Dashboard', 'Templates', 'Analytics'].map((tab) => (
             <button 
               key={tab}
               onClick={() => handleTabClick(tab)}
@@ -41,18 +41,18 @@ export default function Header({ title, tabs, activeTab }) {
         </nav>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Search projects..." 
-            className="pl-9 pr-4 py-2 bg-gray-50 border-none rounded-full text-sm focus:ring-2 focus:ring-primary/20 w-64"
-          />
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 text-gray-400">
+           <button className="hover:text-gray-600"><HelpCircle className="w-5 h-5" /></button>
+           <button className="hover:text-gray-600"><Bell className="w-5 h-5" /></button>
         </div>
-        <button className="text-gray-400 hover:text-gray-600">
-          <Bell className="w-5 h-5" />
-        </button>
+        
+        <div className="flex items-center gap-3 border-l border-gray-100 pl-6">
+          <button className="text-sm font-semibold text-primary hover:underline">Preview</button>
+          <button className="bg-primary text-white px-6 py-2 rounded-lg text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary/90 transition-all">
+            Publish
+          </button>
+        </div>
         
         {/* Profile Dropdown */}
         <div className="relative">
