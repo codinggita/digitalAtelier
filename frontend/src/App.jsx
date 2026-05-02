@@ -64,7 +64,7 @@ function AppRoutes() {
 
       {/* Protected App Routes */}
       <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/pages" element={<PagesManagementPage />} />
         <Route path="/design" element={<DesignSettingsPage />} />
