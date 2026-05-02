@@ -12,6 +12,7 @@ import TemplatesPage from './pages/TemplatesPage';
 import PagesManagementPage from './pages/PagesManagementPage';
 import DesignSettingsPage from './pages/DesignSettingsPage';
 import AssetsLibraryPage from './pages/AssetsLibraryPage';
+import PublishSuccessPage from './pages/PublishSuccessPage';
 import ProjectSettingsPage from './pages/ProjectSettingsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SiteEditorPage from './pages/SiteEditorPage';
@@ -69,6 +70,7 @@ function AppRoutes() {
         <Route path="/pages" element={<PagesManagementPage />} />
         <Route path="/design" element={<DesignSettingsPage />} />
         <Route path="/assets" element={<AssetsLibraryPage />} />
+        <Route path="/publish-success/:id" element={<PublishSuccessPage />} />
         <Route path="/settings" element={<ProjectSettingsPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/publish" element={<PublishPage />} />

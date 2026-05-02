@@ -82,7 +82,10 @@ export default function Header({ title = "Digital Atelier", tabs = ['Dashboard',
             <button className="text-xs font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-2">
               Preview
             </button>
-            <button className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">
+            <button 
+              onClick={() => navigate('/publish-success/demo')}
+              className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
+            >
               Publish
             </button>
           </div>
