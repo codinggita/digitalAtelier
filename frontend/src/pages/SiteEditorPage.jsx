@@ -90,6 +90,7 @@ function EditorInterface({ project, isSaving, handleSave }) {
 // Wrapper component to provide state and handle async project loading
 export default function SiteEditorPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { success: showSuccess, error: showError } = useNotification();
   
   const [project, setProject] = useState(null);
@@ -121,9 +122,13 @@ export default function SiteEditorPage() {
         elements: elementsToSave,
         lastPublishedAt: new Date()
       });
-      showSuccess('Project saved successfully!');
+      showSuccess('Project published successfully!');
+      // Navigate to the publish success page matching Figma design
+      setTimeout(() => {
+        navigate(`/publish-success/${id}`);
+      }, 500);
     } catch (err) {
-      showError('Failed to save project. Please try again.');
+      showError('Failed to publish project. Please try again.');
     } finally {
       setIsSaving(false);
     }

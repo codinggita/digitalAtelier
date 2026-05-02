@@ -2,6 +2,13 @@
 
 Digital Atelier is a premium, full-stack studio management and site builder platform designed for creative entrepreneurs.
 
+---
+
+### 🎨 Design & UI
+👉 **[View Figma Design](https://www.figma.com/design/e0zBFnsULG6m5HwLZFBVGC/Untitled?node-id=0-1&p=f&t=URcXkz8c8YBFBmLY-0)**
+
+---
+
 ## 🚀 Tech Stack
 - **Frontend**: React.js, Vite, Tailwind CSS, Lucide Icons
 - **Backend**: Node.js, Express.js
@@ -289,7 +296,6 @@ digitalAtelier/
 
 - Product Requirements Document (PRD)
 - Figma UI Design (15 screens)
-  👉 [View Figma Design](https://www.figma.com/design/e0zBFnsULG6m5HwLZFBVGC/Untitled?node-id=0-1&p=f&t=URcXkz8c8YBFBmLY-0)
 - System architecture diagram
 - Folder structure & tech stack documentation
 - Working demo (Phase 1)
